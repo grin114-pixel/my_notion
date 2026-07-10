@@ -39,10 +39,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                  var h = location.hostname;
+                  var isLocal =
+                    h === 'localhost' ||
+                    h === '127.0.0.1' ||
+                    h.startsWith('192.168.') ||
+                    h.startsWith('10.') ||
+                    h.endsWith('.local');
+                  if (isLocal) {
                     navigator.serviceWorker.getRegistrations().then(function(regs) {
                       regs.forEach(function(reg) { reg.unregister(); });
                     });
+                    if (window.caches) {
+                      caches.keys().then(function(names) {
+                        names.forEach(function(name) { caches.delete(name); });
+                      });
+                    }
                     return;
                   }
                   navigator.serviceWorker.register('/sw.js');

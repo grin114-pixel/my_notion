@@ -234,8 +234,8 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
   }
 
   return (
-    <main className="flex flex-col h-full min-h-0 bg-brand-50/40">
-      <div className="flex items-center justify-between px-5 py-3 bg-white border-b border-brand-100 shrink-0">
+    <main className="relative flex flex-col h-full min-h-0 bg-brand-50/40">
+      <div className="flex items-center px-5 h-12 bg-white border-b border-brand-100 shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {isEditingFolder && selectedFolder ? (
             <span className="text-sm font-medium text-brand-600">폴더 이름 수정</span>
@@ -267,13 +267,6 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
             </>
           )}
         </div>
-        <button
-          onClick={openAddForm}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-white bg-brand-500 hover:bg-brand-600 transition-colors shrink-0"
-        >
-          <PlusIcon />
-          <span>노트 추가</span>
-        </button>
       </div>
 
       {isEditingFolder && selectedFolder && (
@@ -371,7 +364,7 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
         </div>
       )}
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 pb-24">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-gray-400">
             <svg width="48" height="48" className="mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -380,11 +373,11 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
             <p className="text-sm">노트가 없습니다</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="notes-grid">
             {filtered.map((note, index) =>
               editState?.id === note.id ? (
                 /* 수정 폼 (노트 자리에 인라인으로 표시) */
-                <div key={note.id} className="bg-white rounded-xl border border-brand-300 p-4 shadow-sm col-span-1">
+                <div key={note.id} className="bg-white rounded-xl border border-brand-300 p-4 shadow-sm">
                   <p className="text-xs font-medium text-brand-600 mb-3">노트 수정</p>
                   <select
                     value={editState.folderId}
@@ -448,17 +441,33 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
                 </div>
               ) : (
                 /* 노트 보기 */
-                <div
-                  key={note.id}
-                  className="group relative bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md hover:border-brand-200 transition-all overflow-hidden"
-                >
-                  <div className="absolute top-3 right-3 flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-all z-10">
+                <div key={note.id} className="note-card border border-brand-200">
+                  {note.title && (
+                    <div className="note-card-title">
+                      <p>{note.title}</p>
+                    </div>
+                  )}
+                  <div className="note-card-body">
+                    {note.content && <p>{note.content}</p>}
+                    {note.link && (
+                      <a
+                        href={note.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 flex items-center gap-1.5 text-xs text-brand-500 hover:text-brand-700 hover:underline max-w-full"
+                      >
+                        <LinkIcon />
+                        <span className="truncate min-w-0">{note.link}</span>
+                      </a>
+                    )}
+                  </div>
+                  <div className="note-card-actions">
                     {canReorder && (
-                      <div className="flex flex-col">
+                      <>
                         <button
                           onClick={() => handleMove(note.id, 'up')}
                           disabled={index <= 0 || reorderLoading === note.id}
-                          className="p-0.5 rounded text-gray-300 hover:text-brand-500 hover:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 rounded-md text-gray-400 hover:text-brand-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
                           title="위로"
                         >
                           <ChevronUpIcon size={12} />
@@ -466,16 +475,16 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
                         <button
                           onClick={() => handleMove(note.id, 'down')}
                           disabled={index >= filtered.length - 1 || reorderLoading === note.id}
-                          className="p-0.5 rounded text-gray-300 hover:text-brand-500 hover:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 rounded-md text-gray-400 hover:text-brand-600 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
                           title="아래로"
                         >
                           <ChevronDownIcon size={12} />
                         </button>
-                      </div>
+                      </>
                     )}
                     <button
                       onClick={() => { startEdit(note); setIsAdding(false) }}
-                      className="p-1.5 rounded-lg hover:bg-brand-50 text-gray-300 hover:text-brand-500 transition-all"
+                      className="p-1.5 rounded-md text-gray-400 hover:text-brand-600 hover:bg-white"
                       title="수정"
                     >
                       <EditIcon size={14} />
@@ -483,37 +492,30 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
                     <button
                       onClick={() => handleDelete(note.id)}
                       disabled={deleteLoading === note.id}
-                      className="p-1.5 rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-500 disabled:opacity-50 transition-all"
+                      className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-white disabled:opacity-50"
                       title="삭제"
                     >
                       <TrashIcon size={14} />
                     </button>
                   </div>
-                  {note.title && (
-                    <div className="-mx-4 -mt-4 mb-3 px-4 py-2.5 bg-brand-50 border-b border-brand-100">
-                      <p className="text-sm font-semibold text-gray-900 pr-16 truncate">{note.title}</p>
-                    </div>
-                  )}
-                  {note.content && (
-                    <p className="text-sm text-gray-600 leading-relaxed pr-16 whitespace-pre-wrap">{note.content}</p>
-                  )}
-                  {note.link && (
-                    <a
-                      href={note.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 flex items-center gap-1.5 text-xs text-brand-500 hover:text-brand-700 hover:underline truncate"
-                    >
-                      <LinkIcon />
-                      <span className="truncate">{note.link}</span>
-                    </a>
-                  )}
                 </div>
               )
             )}
           </div>
         )}
       </div>
+
+      {!isAdding && (
+        <button
+          type="button"
+          onClick={openAddForm}
+          className="absolute bottom-5 right-5 z-20 flex items-center gap-1.5 px-4 py-3 rounded-full text-sm font-medium text-white bg-brand-500 hover:bg-brand-600 shadow-lg active:scale-95 transition-all"
+          aria-label="노트 추가"
+        >
+          <PlusIcon />
+          <span>노트 추가</span>
+        </button>
+      )}
     </main>
   )
 }

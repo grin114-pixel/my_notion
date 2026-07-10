@@ -99,19 +99,19 @@ export default function Home() {
         <button
           type="button"
           onClick={handleGoHome}
-          className="flex items-center gap-2 shrink-0 rounded-lg px-1 py-0.5 hover:bg-brand-50 transition-colors"
+          className="flex items-center gap-2 shrink-0 rounded-lg px-1 py-0.5 hover:bg-brand-50 active:bg-brand-100 transition-colors cursor-pointer"
           aria-label="홈으로"
           title="홈으로"
         >
           <img
             src="/icon-192.png"
-            alt=""
+            alt="My Notion"
             width={28}
             height={28}
-            className="w-7 h-7 rounded-[6px] select-none"
+            className="w-7 h-7 rounded-[6px] select-none pointer-events-none"
             draggable={false}
           />
-          <h1 className="text-lg font-bold text-brand-600 tracking-tight hidden sm:block">My Notion</h1>
+          <h1 className="text-lg font-bold text-brand-600 tracking-tight hidden sm:block pointer-events-none">My Notion</h1>
         </button>
 
         {/* 검색창 */}
@@ -143,7 +143,7 @@ export default function Home() {
       {/* 바디: 2열 레이아웃 */}
       <div className="app-body flex flex-1 min-h-0 overflow-hidden">
         {/* 1열: 폴더 */}
-        <div className="app-sidebar shrink-0 h-full overflow-hidden w-fit">
+        <div className="app-sidebar shrink-0 h-full overflow-hidden">
           <FolderColumn
             folders={folders}
             selectedId={selectedId}

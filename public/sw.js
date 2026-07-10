@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mynotion-v2'
+const CACHE_NAME = 'mynotion-v3'
 
 self.addEventListener('install', (event) => {
   self.skipWaiting()
@@ -15,8 +15,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
 
-  // Next.js 빌드 자산은 Service Worker가 건드리지 않음
+  // Next.js 빌드 자산 / 문서 네비게이션은 캐시하지 않음
   if (url.pathname.startsWith('/_next/')) return
+  if (event.request.mode === 'navigate') return
   if (event.request.method !== 'GET') return
 
   // 네트워크 우선 (오프라인일 때만 캐시 사용)

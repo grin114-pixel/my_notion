@@ -60,26 +60,32 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
   }
 
   return (
-    <aside className="inline-flex flex-col h-full min-h-0 max-w-full overflow-hidden bg-white border-r border-brand-100">
-      <div className="flex items-center gap-1 px-2 py-2 border-b border-brand-100 whitespace-nowrap">
-        <h2 className="font-semibold text-gray-700 text-sm">폴더</h2>
-        <button
-          onClick={() => setIsAdding(true)}
-          className="p-1 rounded-md text-brand-600 hover:bg-brand-50 transition-colors"
-          title="폴더 추가"
-        >
-          <PlusIcon />
-        </button>
-      </div>
+    <aside className="folder-sidebar relative inline-flex flex-col h-full min-h-0 max-w-full overflow-hidden bg-white border-r border-brand-100">
+      <button
+        type="button"
+        onClick={onSelectAll}
+        className={`flex items-center gap-1.5 px-2 h-12 w-full border-b border-brand-100 shrink-0 text-left text-sm transition-colors ${
+          selectedId === null
+            ? 'bg-brand-50 text-brand-700 font-medium'
+            : 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+        }`}
+        aria-label="전체보기"
+        title="전체보기"
+      >
+        <span className="shrink-0">
+          <AllIcon active={selectedId === null} />
+        </span>
+        <span className="truncate font-semibold tracking-wide">전체보기</span>
+      </button>
 
       {errorMsg && (
-        <div className="mx-2 mt-1 px-2 py-1.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600 whitespace-nowrap">
+        <div className="mx-1.5 mt-1.5 px-2 py-2 rounded-lg bg-red-50 border border-red-200 text-xs text-red-600">
           ⚠️ {errorMsg}
         </div>
       )}
 
       {isAdding && (
-        <div className="px-2 py-2 border-b border-brand-100 bg-brand-50 whitespace-nowrap">
+        <div className="px-2 py-2.5 border-b border-brand-100 bg-brand-50">
           <input
             autoFocus
             type="text"
@@ -90,21 +96,20 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
               if (e.key === 'Escape') { setIsAdding(false); setNewName('') }
             }}
             placeholder="이름"
-            size={Math.max(newName.length, 4)}
-            className="text-sm px-2 py-1 rounded border border-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white min-w-0"
+            className="w-full text-sm px-2 py-2 rounded-lg border border-brand-200 focus:outline-none focus:ring-2 focus:ring-brand-400 bg-white min-w-0"
           />
-          <div className="flex gap-1 mt-1.5">
+          <div className="flex gap-1 mt-2">
             <button
               onClick={handleAdd}
               disabled={addLoading || !newName.trim()}
-              className="text-xs px-2 py-1 rounded bg-brand-500 text-white font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
+              className="flex-1 text-xs px-2 py-1.5 rounded-lg bg-brand-500 text-white font-medium hover:bg-brand-600 disabled:opacity-50 transition-colors"
             >
               {addLoading ? '...' : '추가'}
             </button>
             <button
               onClick={() => { setIsAdding(false); setNewName('') }}
               disabled={addLoading}
-              className="text-xs px-2 py-1 rounded bg-gray-200 text-gray-600 font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
+              className="flex-1 text-xs px-2 py-1.5 rounded-lg bg-gray-200 text-gray-600 font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
             >
               취소
             </button>
@@ -112,65 +117,56 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
         </div>
       )}
 
-      <ul className="flex-1 overflow-y-auto overflow-x-hidden py-0.5 min-h-0">
-        <li>
-          <button
-            onClick={onSelectAll}
-            className={`flex items-center gap-1.5 px-2 py-1.5 text-left text-sm transition-colors whitespace-nowrap ${
-              selectedId === null
-                ? 'bg-brand-50 text-brand-700 font-medium'
-                : 'text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <AllIcon active={selectedId === null} />
-            <span>전체보기</span>
-          </button>
-        </li>
-
+      <ul className="flex-1 overflow-y-auto overflow-x-hidden py-0 pb-16 min-h-0">
         {folders.length === 0 && (
-          <li className="px-2 py-4 text-gray-400 text-xs whitespace-nowrap">
+          <li className="px-2 py-4 text-gray-400 text-xs">
             추가해보세요
           </li>
         )}
         {folders.map((folder) => {
           const reorderIndex = reorderable.findIndex((f) => f.id === folder.id)
           const canReorder = folder.name !== DEFAULT_FOLDER_NAME
+          const isSelected = selectedId === folder.id
 
           return (
             <li
               key={folder.id}
-              className={`group flex items-center ${
-                selectedId === folder.id ? 'bg-brand-50' : 'hover:bg-gray-50'
+              className={`flex items-center min-h-11 ${
+                isSelected ? 'bg-brand-50' : 'hover:bg-gray-50'
               }`}
             >
               <button
                 onClick={() => onSelect(folder.id)}
-                className={`flex-1 flex items-center gap-1.5 px-2 py-1.5 text-left text-sm transition-colors whitespace-nowrap min-w-0 ${
-                  selectedId === folder.id
+                className={`flex-1 flex items-center gap-1.5 px-2 h-11 text-left text-sm transition-colors min-w-0 ${
+                  isSelected
                     ? 'text-brand-700 font-medium'
                     : 'text-gray-700'
                 }`}
               >
-                <FolderIcon active={selectedId === folder.id} />
-                <span>{folder.name}</span>
+                <span className="shrink-0">
+                  <FolderIcon active={isSelected} />
+                </span>
+                <span className="truncate" title={folder.name}>{folder.name}</span>
               </button>
-              {canReorder && (
-                <div className="flex flex-col shrink-0 opacity-0 group-hover:opacity-100 pr-0.5 transition-opacity">
+              {canReorder && isSelected && (
+                <div className="flex flex-col shrink-0 pr-0.5">
                   <button
                     onClick={(e) => { e.stopPropagation(); handleMove(folder.id, 'up') }}
                     disabled={reorderIndex <= 0 || reorderLoading === folder.id}
-                    className="p-0.5 rounded text-gray-400 hover:text-brand-500 hover:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-brand-600 hover:bg-white active:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
                     title="위로"
+                    aria-label="위로"
                   >
-                    <ChevronUpIcon size={11} />
+                    <ChevronUpIcon size={12} />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleMove(folder.id, 'down') }}
                     disabled={reorderIndex >= reorderable.length - 1 || reorderLoading === folder.id}
-                    className="p-0.5 rounded text-gray-400 hover:text-brand-500 hover:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-brand-600 hover:bg-white active:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
                     title="아래로"
+                    aria-label="아래로"
                   >
-                    <ChevronDownIcon size={11} />
+                    <ChevronDownIcon size={12} />
                   </button>
                 </div>
               )}
@@ -178,6 +174,18 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
           )
         })}
       </ul>
+
+      {!isAdding && (
+        <button
+          type="button"
+          onClick={() => setIsAdding(true)}
+          className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center w-11 h-11 rounded-full text-white bg-brand-500 hover:bg-brand-600 shadow-lg active:scale-95 transition-all"
+          title="폴더 추가"
+          aria-label="폴더 추가"
+        >
+          <PlusIcon />
+        </button>
+      )}
     </aside>
   )
 }
