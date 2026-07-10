@@ -1,0 +1,80 @@
+@import "tailwindcss";
+@source "./";
+@source "../lib";
+
+@theme {
+  /* 블랙앤화이트 메인 컬러 */
+  --color-brand-50: #FAFAFA;
+  --color-brand-100: #F4F4F5;
+  --color-brand-200: #E4E4E7;
+  --color-brand-300: #D4D4D8;
+  --color-brand-400: #A1A1AA;
+  --color-brand-500: #18181B;
+  --color-brand-600: #09090B;
+  --color-brand-700: #000000;
+  --color-brand-800: #000000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Tailwind 로드 실패 시에도 2열 레이아웃 유지 */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fafafa;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.app-sidebar {
+  width: fit-content;
+  max-width: fit-content;
+  flex-shrink: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-noto: 'Noto Sans KR', sans-serif;
+}
+
+body {
+  font-family: var(--font-noto), sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 스크롤바 스타일 */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e4e4e7;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d8;
+}
