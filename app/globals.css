@@ -137,6 +137,49 @@ body {
   word-break: break-word;
 }
 
+.note-card-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0.75rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.note-card-images {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.note-card-images .note-card-image {
+  margin-top: 0;
+}
+
+.note-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.note-content-text {
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.625;
+  color: #4b5563;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.note-content-image {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
 .note-card-actions {
   display: flex;
   align-items: center;

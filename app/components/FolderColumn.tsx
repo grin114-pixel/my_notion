@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { DEFAULT_FOLDER_NAME, insertFolder, swapFolderPositions, type Folder } from '@/lib/supabase'
-import { PlusIcon, FolderIcon, AllIcon, ChevronUpIcon, ChevronDownIcon } from './icons'
+import { DEFAULT_FOLDER_NAME, insertFolder, type Folder } from '@/lib/supabase'
+import { PlusIcon, FolderIcon, AllIcon } from './icons'
 
 type Props = {
   folders: Folder[]
@@ -16,7 +16,6 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
   const [newName, setNewName] = useState('')
   const [isAdding, setIsAdding] = useState(false)
   const [addLoading, setAddLoading] = useState(false)
-  const [reorderLoading, setReorderLoading] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState('')
 
   const reorderable = folders.filter((f) => f.name !== DEFAULT_FOLDER_NAME)
@@ -37,26 +36,6 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
       setErrorMsg(error || '추가 실패. 콘솔을 확인하세요.')
     }
     setAddLoading(false)
-  }
-
-  const handleMove = async (id: string, direction: 'up' | 'down') => {
-    const index = reorderable.findIndex((f) => f.id === id)
-    if (index === -1) return
-    const swapIndex = direction === 'up' ? index - 1 : index + 1
-    if (swapIndex < 0 || swapIndex >= reorderable.length) return
-
-    const current = reorderable[index]
-    const neighbor = reorderable[swapIndex]
-
-    setReorderLoading(id)
-    setErrorMsg('')
-    const { error } = await swapFolderPositions(current, neighbor)
-    if (error) {
-      setErrorMsg(error)
-    } else {
-      onRefresh()
-    }
-    setReorderLoading(null)
   }
 
   return (
@@ -124,8 +103,6 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
           </li>
         )}
         {folders.map((folder) => {
-          const reorderIndex = reorderable.findIndex((f) => f.id === folder.id)
-          const canReorder = folder.name !== DEFAULT_FOLDER_NAME
           const isSelected = selectedId === folder.id
 
           return (
@@ -148,28 +125,6 @@ export default function FolderColumn({ folders, selectedId, onSelectAll, onSelec
                 </span>
                 <span className="truncate" title={folder.name}>{folder.name}</span>
               </button>
-              {canReorder && isSelected && (
-                <div className="flex flex-col shrink-0 pr-0.5">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleMove(folder.id, 'up') }}
-                    disabled={reorderIndex <= 0 || reorderLoading === folder.id}
-                    className="flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-brand-600 hover:bg-white active:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="위로"
-                    aria-label="위로"
-                  >
-                    <ChevronUpIcon size={12} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleMove(folder.id, 'down') }}
-                    disabled={reorderIndex >= reorderable.length - 1 || reorderLoading === folder.id}
-                    className="flex items-center justify-center w-6 h-6 rounded text-gray-400 hover:text-brand-600 hover:bg-white active:bg-brand-50 disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="아래로"
-                    aria-label="아래로"
-                  >
-                    <ChevronDownIcon size={12} />
-                  </button>
-                </div>
-              )}
             </li>
           )
         })}

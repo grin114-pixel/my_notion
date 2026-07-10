@@ -37,3 +37,29 @@ alter table mynotion_notes enable row level security;
 -- 모든 사용자 읽기/쓰기 허용 (필요에 따라 수정)
 create policy "Allow all on mynotion_folders" on mynotion_folders for all using (true) with check (true);
 create policy "Allow all on mynotion_notes" on mynotion_notes for all using (true) with check (true);
+
+-- 노트 이미지 Storage 버킷 (공개 읽기)
+insert into storage.buckets (id, name, public)
+values ('note-images', 'note-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Public read note images" on storage.objects;
+drop policy if exists "Public upload note images" on storage.objects;
+drop policy if exists "Public update note images" on storage.objects;
+drop policy if exists "Public delete note images" on storage.objects;
+
+create policy "Public read note images"
+  on storage.objects for select
+  using (bucket_id = 'note-images');
+
+create policy "Public upload note images"
+  on storage.objects for insert
+  with check (bucket_id = 'note-images');
+
+create policy "Public update note images"
+  on storage.objects for update
+  using (bucket_id = 'note-images');
+
+create policy "Public delete note images"
+  on storage.objects for delete
+  using (bucket_id = 'note-images');

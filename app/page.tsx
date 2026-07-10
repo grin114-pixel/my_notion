@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase, TABLES, ensureDefaultFolder, ensureFolderSortOrders, detectFolderSortOrderSupport, sortFolders, detectNoteSortOrderSupport, ensureNoteSortOrders, sortNotes, DEFAULT_FOLDER_NAME, type Folder, type Note } from '@/lib/supabase'
 import FolderColumn from './components/FolderColumn'
 import NoteColumn from './components/NoteColumn'
-import { SearchIcon, XIcon } from './components/icons'
+import { SearchIcon, XIcon, RefreshIcon } from './components/icons'
 
 export default function Home() {
   const [folders, setFolders] = useState<Folder[]>([])
@@ -12,6 +12,7 @@ export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [homeResetToken, setHomeResetToken] = useState(0)
+  const [refreshing, setRefreshing] = useState(false)
 
   const selectedFolder = folders.find((f) => f.id === selectedId) ?? null
   const defaultFolder = folders.find((f) => f.name === DEFAULT_FOLDER_NAME) ?? null
@@ -84,6 +85,15 @@ export default function Home() {
     setHomeResetToken((t) => t + 1)
   }
 
+  const handleRefreshAll = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      await Promise.all([fetchFolders(), fetchNotes()])
+    } finally {
+      setRefreshing(false)
+    }
+  }, [fetchFolders, fetchNotes])
+
   const displayedNotes = searchQuery
     ? notes.filter((n) => {
         const q = searchQuery.toLowerCase()
@@ -94,7 +104,7 @@ export default function Home() {
   return (
     <div className="app-shell flex flex-col h-screen bg-brand-50/40">
       {/* 헤더 */}
-      <header className="flex items-center gap-3 px-4 py-3 bg-white border-b border-brand-100 shadow-sm z-10">
+      <header className="flex items-center gap-2 px-3 py-3 bg-white border-b border-brand-100 shadow-sm z-10">
         {/* 앱 로고/타이틀 */}
         <button
           type="button"
@@ -115,7 +125,7 @@ export default function Home() {
         </button>
 
         {/* 검색창 */}
-        <div className="flex-1 max-w-xl mx-auto relative">
+        <div className="flex-1 max-w-xl mx-auto relative min-w-0">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-gray-400">
             <SearchIcon />
           </div>
@@ -138,6 +148,19 @@ export default function Home() {
             </button>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={handleRefreshAll}
+          disabled={refreshing}
+          className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full text-white bg-brand-500 hover:bg-brand-600 active:scale-95 disabled:opacity-60 shadow-sm transition-all"
+          aria-label="새로고침"
+          title="새로고침"
+        >
+          <span className={refreshing ? 'animate-spin' : undefined}>
+            <RefreshIcon size={14} />
+          </span>
+        </button>
       </header>
 
       {/* 바디: 2열 레이아웃 */}
@@ -163,7 +186,7 @@ export default function Home() {
             searchQuery={searchQuery}
             homeResetToken={homeResetToken}
             onRefresh={fetchNotes}
-            onFolderRefresh={() => { fetchFolders(); fetchNotes() }}
+            onFolderRefresh={handleRefreshAll}
             onFolderDeleted={() => { setSelectedId(null); fetchFolders(); fetchNotes() }}
           />
         </div>
