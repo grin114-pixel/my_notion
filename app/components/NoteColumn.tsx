@@ -168,6 +168,7 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
   const [folderEditName, setFolderEditName] = useState('')
   const [folderEditLoading, setFolderEditLoading] = useState(false)
   const [folderDeleteLoading, setFolderDeleteLoading] = useState(false)
+  const [pendingFolderDelete, setPendingFolderDelete] = useState(false)
   const [folderReorderLoading, setFolderReorderLoading] = useState(false)
   const [reorderLoading, setReorderLoading] = useState<string | null>(null)
   const editContentRef = useRef<HTMLTextAreaElement>(null)
@@ -360,6 +361,7 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
 
   useEffect(() => {
     setIsEditingFolder(false)
+    setPendingFolderDelete(false)
   }, [selectedFolder?.id])
 
   useEffect(() => {
@@ -372,6 +374,7 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
     setEditState(null)
     setEditError('')
     setPendingDeleteId(null)
+    setPendingFolderDelete(false)
     setIsEditingFolder(false)
     setFolderEditName('')
   }, [homeResetToken])
@@ -416,13 +419,23 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
     setFolderEditLoading(false)
   }
 
-  const handleFolderDelete = async () => {
+  const requestFolderDelete = () => {
     if (!selectedFolder) return
-    if (!confirm('이 폴더를 삭제하면 하위 노트도 모두 삭제됩니다. 계속할까요?')) return
+    setPendingFolderDelete(true)
+  }
+
+  const cancelFolderDelete = () => {
+    if (folderDeleteLoading) return
+    setPendingFolderDelete(false)
+  }
+
+  const confirmFolderDelete = async () => {
+    if (!selectedFolder) return
     setFolderDeleteLoading(true)
     const { error } = await deleteFolderWithNoteImages(selectedFolder.id)
     if (!error) onFolderDeleted()
     setFolderDeleteLoading(false)
+    setPendingFolderDelete(false)
   }
 
   const handleFolderMove = async (direction: 'up' | 'down') => {
@@ -497,7 +510,7 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
                     <EditIcon size={14} />
                   </button>
                   <button
-                    onClick={handleFolderDelete}
+                    onClick={requestFolderDelete}
                     disabled={folderDeleteLoading}
                     className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 disabled:opacity-50 transition-colors"
                     title="폴더 삭제"
@@ -793,6 +806,42 @@ export default function NoteColumn({ notes, folders, selectedFolder, defaultFold
                 className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
               >
                 {deleteLoading ? '삭제 중...' : '삭제'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {pendingFolderDelete && (
+        <div
+          className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 px-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-folder-title"
+        >
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+            <h3 id="delete-folder-title" className="text-base font-semibold text-gray-900">
+              폴더를 삭제할까요?
+            </h3>
+            <p className="mt-2 text-sm text-gray-500">
+              이 폴더를 삭제하면 하위 노트도 모두 삭제됩니다.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={cancelFolderDelete}
+                disabled={folderDeleteLoading}
+                className="flex-1 py-2.5 rounded-lg bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={confirmFolderDelete}
+                disabled={folderDeleteLoading}
+                className="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-600 disabled:opacity-50"
+              >
+                {folderDeleteLoading ? '삭제 중...' : '삭제'}
               </button>
             </div>
           </div>
